@@ -1,5 +1,4 @@
 from enum import Enum
-
 import pygame
 pygame.init()
 
@@ -83,27 +82,24 @@ MAZE_LAYOUT_ORIGINAL = [
     "############################"
 ]
 
-# Paramètres de l'agent d'apprentissage par renforcement
+# Paramètres de l'agent
 AGENT_ALPHA = 0.1
 AGENT_GAMMA = 0.9
 AGENT_EPSILON = 0.3
 
-# Rewards pour l'agent
 REWARD_DOT = 10
 REWARD_POWER_PELLET = 50
 REWARD_WALL = -5
 REWARD_EMPTY = -1
 
-# Paramètres du jeu
 SCORE_DOT = 10
 SCORE_POWER_PELLET = 50
 INITIAL_LIVES = 3
 COLLISION_THRESHOLD = 0.5
 FPS = 60
 
-# Positions de départ
-PACMAN_START_X = 14
-PACMAN_START_Y = 18
+PACMAN_START_X = 15.0
+PACMAN_START_Y = 18.0
 GHOST_START_X = 14
 GHOST_START_Y = 9
 GHOST2_START_X = 13
@@ -113,11 +109,9 @@ GHOST3_START_Y = 9
 GHOST4_START_X = 14
 GHOST4_START_Y = 10
 
-# Paramètres de mouvement
-PACMAN_SPEED = 0.1
-GHOST_SPEED = 0.08
+PACMAN_SPEED = 0.15
+GHOST_SPEED = 0.1
 
-# Paramètres d'affichage
 UI_HEIGHT = 50
 FONT_SIZE = 24
 DOT_RADIUS = 2

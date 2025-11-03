@@ -67,23 +67,22 @@ class PacManAgent:
         new_x = int(self.pacman.x)
         new_y = int(self.pacman.y)
         
-        if 0 <= new_x < MAZE_WIDTH and 0 <= new_y < MAZE_HEIGHT:
-            cell = self.maze[new_y][new_x]
-            reward = self.get_reward(cell)
-            new_state = (new_x, new_y)
-            
-            if new_state not in self.qtable:
-                self.qtable[new_state] = {
-                    Direction.UP: 0,
-                    Direction.DOWN: 0,
-                    Direction.LEFT: 0,
-                    Direction.RIGHT: 0
-                }
-            
-            max_future_q = max(self.qtable[new_state].values())
-            current_q = self.qtable[state][action]
-            
-            self.qtable[state][action] = current_q + self.alpha * (
-                reward + self.gamma * max_future_q - current_q
-            )
+        cell = self.maze.get_cell(new_x, new_y)
+        reward = self.get_reward(cell)
+        new_state = (new_x, new_y)
+        
+        if new_state not in self.qtable:
+            self.qtable[new_state] = {
+                Direction.UP: 0,
+                Direction.DOWN: 0,
+                Direction.LEFT: 0,
+                Direction.RIGHT: 0
+            }
+        
+        max_future_q = max(self.qtable[new_state].values())
+        current_q = self.qtable[state][action]
+        
+        self.qtable[state][action] = current_q + self.alpha * (
+            reward + self.gamma * max_future_q - current_q
+        )
 

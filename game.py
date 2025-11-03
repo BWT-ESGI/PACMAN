@@ -15,6 +15,7 @@ from constants import (
 from pacman import PacMan
 from ghost import Ghost
 from agent import PacManAgent
+from maze import Maze
 
 class Game:
     def __init__(self, use_agent=False):
@@ -22,8 +23,7 @@ class Game:
         pygame.display.set_caption("Pac-Man")
         self.clock = pygame.time.Clock()
         
-        # Créer une copie du labyrinthe pour pouvoir le modifier
-        self.maze = [list(row) for row in MAZE_LAYOUT]
+        self.maze = Maze(MAZE_LAYOUT)
         
         # Initialisation des objets du jeu
         self.pacman = PacMan(PACMAN_START_X, PACMAN_START_Y)
@@ -45,12 +45,11 @@ class Game:
         self.dots_eaten = 0
         self.total_dots = 0
         
-        # Compter les points
-        for row in MAZE_LAYOUT:
-            self.total_dots += row.count('.') + row.count('o')
+        self.total_dots = self.maze.count_dots()
         
         self.running = True
         self.game_over = False
+        self.collision_cooldown = 0
         
     def handle_events(self):
         for event in pygame.event.get():
@@ -89,46 +88,49 @@ class Game:
             # Mise à jour de Pac-Man
             self.pacman.update(self.maze)
             
-            # Vérifier les collisions avec les points
             pacman_cell_x = int(self.pacman.x)
             pacman_cell_y = int(self.pacman.y)
             
-            if (0 <= pacman_cell_x < MAZE_WIDTH and 
-                0 <= pacman_cell_y < MAZE_HEIGHT):
-                cell = self.maze[pacman_cell_y][pacman_cell_x]
-                if cell == '.':
+            if 0 <= pacman_cell_x < MAZE_WIDTH and 0 <= pacman_cell_y < MAZE_HEIGHT:
+                eaten = self.maze.eat_dot(pacman_cell_x, pacman_cell_y)
+                if eaten == '.':
                     self.score += SCORE_DOT
                     self.dots_eaten += 1
-                    self.maze[pacman_cell_y][pacman_cell_x] = ' '
-                elif cell == 'o':
+                elif eaten == 'o':
                     self.score += SCORE_POWER_PELLET
                     self.dots_eaten += 1
-                    self.maze[pacman_cell_y][pacman_cell_x] = ' '
             
             # Mise à jour des fantômes
             for ghost in self.ghosts:
                 ghost.update(self.maze, self.pacman)
             
             # Vérifier les collisions avec les fantômes
-            for ghost in self.ghosts:
-                if (abs(self.pacman.x - ghost.x) < COLLISION_THRESHOLD and 
-                    abs(self.pacman.y - ghost.y) < COLLISION_THRESHOLD):
-                    self.lives -= 1
-                    if self.lives <= 0:
-                        self.game_over = True
-                    else:
-                        self.pacman.x = PACMAN_START_X
-                        self.pacman.y = PACMAN_START_Y
-                        self.pacman.direction = Direction.RIGHT
-                        self.pacman.next_direction = Direction.RIGHT
+            if self.collision_cooldown <= 0:
+                for ghost in self.ghosts:
+                    if (abs(self.pacman.x - ghost.x) < COLLISION_THRESHOLD and 
+                        abs(self.pacman.y - ghost.y) < COLLISION_THRESHOLD):
+                        self.lives -= 1
+                        self.collision_cooldown = 60  # 1 seconde de cooldown (60 frames)
+                        if self.lives <= 0:
+                            self.game_over = True
+                        else:
+                            # Repositionner seulement si on a encore des vies
+                            self.pacman.x = PACMAN_START_X
+                            self.pacman.y = PACMAN_START_Y
+                            self.pacman.direction = Direction.RIGHT
+                            self.pacman.next_direction = Direction.RIGHT
+                        break
+            else:
+                self.collision_cooldown -= 1
             
             # Vérifier la victoire
             if self.dots_eaten >= self.total_dots:
                 self.game_over = True
     
     def draw_maze(self):
-        for y, row in enumerate(self.maze):
-            for x, cell in enumerate(row):
+        for y in range(MAZE_HEIGHT):
+            for x in range(MAZE_WIDTH):
+                cell = self.maze.get_cell(x, y)
                 rect = pygame.Rect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE)
                 if cell == '#':
                     pygame.draw.rect(self.screen, DARK_BLUE, rect)
@@ -195,9 +197,9 @@ class Game:
         self.lives = INITIAL_LIVES
         self.dots_eaten = 0
         self.game_over = False
+        self.collision_cooldown = 0
         
-        # Restaurer le labyrinthe
-        self.maze = [list(row) for row in MAZE_LAYOUT_ORIGINAL]
+        self.maze.reset(MAZE_LAYOUT_ORIGINAL)
         
         # Réinitialiser l'agent
         self.agent = PacManAgent(self.pacman, self.maze)
