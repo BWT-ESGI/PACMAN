@@ -106,18 +106,21 @@ class Game:
             
             # Vérifier les collisions avec les fantômes
             if self.collision_cooldown <= 0:
+                pacman_cell_x = int(self.pacman.x)
+                pacman_cell_y = int(self.pacman.y)
+                
                 for ghost in self.ghosts:
-                    if (abs(self.pacman.x - ghost.x) < COLLISION_THRESHOLD and 
-                        abs(self.pacman.y - ghost.y) < COLLISION_THRESHOLD):
+                    ghost_cell_x = int(ghost.x)
+                    ghost_cell_y = int(ghost.y)
+                    
+                    # Collision si dans la même cellule
+                    if pacman_cell_x == ghost_cell_x and pacman_cell_y == ghost_cell_y:
                         self.lives -= 1
-                        self.collision_cooldown = 60  # 1 seconde de cooldown (60 frames)
+                        self.collision_cooldown = 60
                         
                         if self.lives <= 0:
-                            # Plus de vies : Game Over
                             self.game_over = True
-                            # Ne pas repositionner, juste arrêter le jeu
                         else:
-                            # Repositionner Pac-Man à sa position de départ
                             self.pacman.x = PACMAN_START_X
                             self.pacman.y = PACMAN_START_Y
                             self.pacman.direction = Direction.RIGHT
@@ -137,14 +140,12 @@ class Game:
                             self.ghosts[3].y = GHOST4_START_Y
                             self.ghosts[3].direction = Direction.UP
                             
-                            # Réinitialiser l'agent pour recommencer l'apprentissage
                             if self.agent.enabled:
                                 self.agent.reset()
                         break
             else:
                 self.collision_cooldown -= 1
             
-            # Vérifier la victoire
             if self.dots_eaten >= self.total_dots:
                 self.game_over = True
     
@@ -179,7 +180,6 @@ class Game:
         agent_text = font.render(agent_status, True, WHITE)
         self.screen.blit(agent_text, (10, MAZE_HEIGHT * CELL_SIZE - 20))
         
-        # Instructions
         if self.game_over:
             if self.dots_eaten >= self.total_dots:
                 game_over_text = font.render("VICTOIRE! Appuyez sur R pour recommencer", True, WHITE)
@@ -220,7 +220,6 @@ class Game:
         
         self.maze.reset(MAZE_LAYOUT_ORIGINAL)
         
-        # Réinitialiser l'agent
         self.agent = PacManAgent(self.pacman, self.maze)
         if self.agent.enabled:
             self.agent.enable()
