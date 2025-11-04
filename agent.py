@@ -6,8 +6,6 @@ from constants import (
 )
 
 class PacManAgent:
-    """Mini agent pour contrôler Pac-Man automatiquement"""
-    
     def __init__(self, pacman, maze):
         self.pacman = pacman
         self.maze = maze
@@ -23,6 +21,9 @@ class PacManAgent:
     def disable(self):
         self.enabled = False
     
+    def reset(self):
+        self.qtable = {}
+    
     def get_state(self):
         return (int(self.pacman.x), int(self.pacman.y))
     
@@ -37,7 +38,6 @@ class PacManAgent:
             return REWARD_EMPTY
     
     def get_action(self):
-        """Obtenir la meilleure action selon l'état actuel"""
         state = self.get_state()
         
         if state not in self.qtable:
@@ -55,7 +55,6 @@ class PacManAgent:
             return max(self.qtable[state], key=self.qtable[state].get)
     
     def update(self):
-        """Mettre à jour l'agent (apprentissage)"""
         if not self.enabled:
             return
         

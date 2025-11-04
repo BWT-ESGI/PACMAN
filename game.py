@@ -75,8 +75,8 @@ class Game:
                         self.agent.enable()
                         print("Agent activé - Contrôle automatique")
                 
-                # Redémarrer le jeu
-                if event.key == pygame.K_r and self.game_over:
+                # Redémarrer le jeu (fonctionne toujours, pas seulement en game over)
+                if event.key == pygame.K_r:
                     self.restart_game()
     
     def update(self):
@@ -111,14 +111,35 @@ class Game:
                         abs(self.pacman.y - ghost.y) < COLLISION_THRESHOLD):
                         self.lives -= 1
                         self.collision_cooldown = 60  # 1 seconde de cooldown (60 frames)
+                        
                         if self.lives <= 0:
+                            # Plus de vies : Game Over
                             self.game_over = True
+                            # Ne pas repositionner, juste arrêter le jeu
                         else:
-                            # Repositionner seulement si on a encore des vies
+                            # Repositionner Pac-Man à sa position de départ
                             self.pacman.x = PACMAN_START_X
                             self.pacman.y = PACMAN_START_Y
                             self.pacman.direction = Direction.RIGHT
                             self.pacman.next_direction = Direction.RIGHT
+                            
+                            # Repositionner les fantômes à leur position de départ
+                            self.ghosts[0].x = GHOST_START_X
+                            self.ghosts[0].y = GHOST_START_Y
+                            self.ghosts[0].direction = Direction.UP
+                            self.ghosts[1].x = GHOST2_START_X
+                            self.ghosts[1].y = GHOST2_START_Y
+                            self.ghosts[1].direction = Direction.UP
+                            self.ghosts[2].x = GHOST3_START_X
+                            self.ghosts[2].y = GHOST3_START_Y
+                            self.ghosts[2].direction = Direction.UP
+                            self.ghosts[3].x = GHOST4_START_X
+                            self.ghosts[3].y = GHOST4_START_Y
+                            self.ghosts[3].direction = Direction.UP
+                            
+                            # Réinitialiser l'agent pour recommencer l'apprentissage
+                            if self.agent.enabled:
+                                self.agent.reset()
                         break
             else:
                 self.collision_cooldown -= 1
@@ -149,16 +170,14 @@ class Game:
         
         font = pygame.font.Font(None, FONT_SIZE)
         score_text = font.render(f"Score: {self.score}", True, WHITE)
-        self.screen.blit(score_text, (10, MAZE_HEIGHT * CELL_SIZE + 10))
+        self.screen.blit(score_text, (10, MAZE_HEIGHT * CELL_SIZE - 60))
         
-        # Vies
         lives_text = font.render(f"Vies: {self.lives}", True, WHITE)
-        self.screen.blit(lives_text, (10, MAZE_HEIGHT * CELL_SIZE + 35))
+        self.screen.blit(lives_text, (10, MAZE_HEIGHT * CELL_SIZE - 40))
         
-        # État de l'agent
         agent_status = "Agent: ON" if self.agent.enabled else "Agent: OFF"
         agent_text = font.render(agent_status, True, WHITE)
-        self.screen.blit(agent_text, (200, MAZE_HEIGHT * CELL_SIZE + 10))
+        self.screen.blit(agent_text, (10, MAZE_HEIGHT * CELL_SIZE - 20))
         
         # Instructions
         if self.game_over:
@@ -170,7 +189,7 @@ class Game:
             self.screen.blit(game_over_text, text_rect)
         else:
             if self.agent.enabled:
-                instructions_text = font.render("Agent actif - Appuyez sur A pour désactiver", True, WHITE)
+                instructions_text = font.render("Agent actif - Appuyez sur A pour désactiver | R: Recommencer", True, WHITE)
             else:
                 instructions_text = font.render("Flèches: Jouer | A: Activer agent | R: Recommencer", True, WHITE)
             text_rect = instructions_text.get_rect(center=(WINDOW_WIDTH // 2, MAZE_HEIGHT * CELL_SIZE + 25))

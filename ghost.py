@@ -36,7 +36,6 @@ class Ghost:
     
     def draw(self, screen):
         import pygame
-        # Convertir position monde en pixel : position entière = centre de cellule
         cell_x = int(self.x)
         cell_y = int(self.y)
         pixel_x = cell_x * CELL_SIZE + CELL_SIZE // 2
