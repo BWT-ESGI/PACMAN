@@ -73,15 +73,23 @@ class Ghost:
                         exit_directions.append(direction)
             
             # Si on a trouvé des directions de sortie, choisir la première (UP en priorité)
+            direction_chosen = False
             if exit_directions:
                 for direction in exit_directions:
                     if not self.would_collide_with_ghost(maze, direction, other_ghosts):
                         self.direction = direction
+                        direction_chosen = True
                         break
-            else:
-                # Sinon, essayer n'importe quelle direction valide pour bouger
+                # Si aucune direction de sortie sans collision, choisir quand même une direction de sortie
+                if not direction_chosen:
+                    self.direction = exit_directions[0]
+                    direction_chosen = True
+            
+            # Sinon, essayer n'importe quelle direction valide pour bouger
+            if not direction_chosen:
                 for direction in [Direction.UP, Direction.LEFT, Direction.RIGHT, Direction.DOWN]:
-                    if maze.can_move(self.x, self.y, direction) and not self.would_collide_with_ghost(maze, direction, other_ghosts):
+                    if maze.can_move(self.x, self.y, direction):
+                        # Dans le spawn, on peut ignorer les collisions pour éviter de rester bloqué
                         self.direction = direction
                         break
             
