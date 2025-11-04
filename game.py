@@ -102,7 +102,9 @@ class Game:
             
             # Mise à jour des fantômes
             for ghost in self.ghosts:
-                ghost.update(self.maze, self.pacman)
+                # Passer tous les autres ghosts pour éviter les collisions entre eux
+                other_ghosts = [g for g in self.ghosts if g != ghost]
+                ghost.update(self.maze, self.pacman, other_ghosts)
             
             # Vérifier les collisions avec les fantômes
             if self.collision_cooldown <= 0:
@@ -130,15 +132,19 @@ class Game:
                             self.ghosts[0].x = GHOST_START_X
                             self.ghosts[0].y = GHOST_START_Y
                             self.ghosts[0].direction = Direction.UP
+                            self.ghosts[0].has_left_spawn = False
                             self.ghosts[1].x = GHOST2_START_X
                             self.ghosts[1].y = GHOST2_START_Y
                             self.ghosts[1].direction = Direction.UP
+                            self.ghosts[1].has_left_spawn = False
                             self.ghosts[2].x = GHOST3_START_X
                             self.ghosts[2].y = GHOST3_START_Y
                             self.ghosts[2].direction = Direction.UP
+                            self.ghosts[2].has_left_spawn = False
                             self.ghosts[3].x = GHOST4_START_X
                             self.ghosts[3].y = GHOST4_START_Y
                             self.ghosts[3].direction = Direction.UP
+                            self.ghosts[3].has_left_spawn = False
                             
                             if self.agent.enabled:
                                 self.agent.reset()
